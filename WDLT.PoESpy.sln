@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WDLT.PoESpy", "WDLT.PoESpy\WDLT.PoESpy.csproj", "{3A3764D9-585D-4024-8B9D-13585C99022C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{9CA69CC6-EF8F-405C-98D4-4EDF9AB152D7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A3764D9-585D-4024-8B9D-13585C99022C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A3764D9-585D-4024-8B9D-13585C99022C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A3764D9-585D-4024-8B9D-13585C99022C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A3764D9-585D-4024-8B9D-13585C99022C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DC0D3BA4-6FA9-428F-83CD-84BEDABBAD10}
+	EndGlobalSection
+EndGlobal
