@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WDLT.PoESpy
+namespace WDLT.PoESpy.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MoneywayView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MoneywayView : UserControl
     {
-        public MainWindow()
+        public MoneywayView()
         {
             InitializeComponent();
         }

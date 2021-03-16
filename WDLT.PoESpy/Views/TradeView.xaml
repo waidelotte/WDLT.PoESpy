@@ -1,0 +1,193 @@
+﻿<mah:MetroWindow x:Class="WDLT.PoESpy.Views.TradeView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:s="https://github.com/canton7/Stylet"
+                 mc:Ignorable="d"
+                 MinHeight="500"
+                 MinWidth="500"
+                 SaveWindowPosition="True"
+                 ShowIconOnTitleBar="True"
+                 NonActiveWindowTitleBrush="{DynamicResource PrimaryHueDarkBrush}"
+                 NonActiveBorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                 RightWindowCommandsOverlayBehavior="Never"
+                 ResizeMode="CanResize"
+                 x:Name="TradeWindow"
+                 xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                 xmlns:viewModels="clr-namespace:WDLT.PoESpy.ViewModels"
+                 xmlns:enumPoe="clr-namespace:WDLT.Clients.POE.Enums;assembly=WDLT.Clients.POE"
+                 d:DataContext="{d:DesignInstance viewModels:TradeViewModel}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ListView ItemsSource="{Binding Fetch}"
+                  BorderThickness="0"
+                  Margin="0"
+                  VirtualizingStackPanel.VirtualizationMode="Standard"
+                  VirtualizingStackPanel.ScrollUnit="Pixel"
+                  VirtualizingStackPanel.CacheLength="2"
+                  Grid.IsSharedSizeScope="true"
+                  VirtualizingStackPanel.CacheLengthUnit="Page"
+                  HorizontalContentAlignment="Stretch"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.ScrollChanged="{s:Action ScrollChanged}"
+                  ScrollViewer.VerticalScrollBarVisibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  SelectionMode="Single"
+                  Padding="0">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Focusable" Value="false"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid Name="Header" Grid.Row="0" Background="{DynamicResource MaterialDesignDarkBackground}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SZG_CA"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SZG_TIME"/>
+                                </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Margin="5 0 3 0" RenderOptions.BitmapScalingMode="HighQuality"  Height="30" Width="30" VerticalAlignment="Center" Source="{Binding Listing.Price.Currency, Converter={StaticResource ImageCacheConverter}, ConverterParameter={x:Static enumPoe:EPOEStaicType.Currency}, Mode=OneWay}"/>
+                                    <TextBlock Grid.Column="1"  Padding="0 0 5 0" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" Text="{Binding Listing.Price.Amount}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    <StackPanel VerticalAlignment="Center" Margin="5 0" Grid.Column="2">
+                                    <TextBlock FontSize="10" FontWeight="SemiBold" Text="{Binding Item.Name}" Visibility="{Binding Item.Name, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontSize="12"  Foreground="{DynamicResource PrimaryHueMidBrush}"  Visibility="{Binding Item.StackSize, Converter={StaticResource NotZeroToVisibilityConverter}}" FontWeight="SemiBold" Text="{Binding Item.StackSize}" Margin="0 0 3 0"/>
+                                        <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding Item.TypeLine}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Magic}">
+                                                            <Setter Property="Foreground" Value="#8888ff"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Rare}">
+                                                            <Setter Property="Foreground" Value="#ffff77"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Unique}">
+                                                            <Setter Property="Foreground" Value="#af6025"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Gem}">
+                                                            <Setter Property="Foreground" Value="#1ba29b"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Currency}">
+                                                            <Setter Property="Foreground" Value="#aa9e82"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Relic}">
+                                                            <Setter Property="Foreground" Value="#82ad6a"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Prophecy}">
+                                                            <Setter Property="Foreground" Value="#b54bff"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Item.FrameType}" Value="{x:Static enumPoe:EPOEFrameType.Card}">
+                                                            <Setter Property="Foreground" Value="#aa9e82"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                                    <StackPanel VerticalAlignment="Center" Opacity="0.75" Grid.Column="3" Margin="5 0 5 0">
+                                    <TextBlock Text="{Binding Listing.Account.Name}" FontSize="12">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="LawnGreen"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Listing.Account.Online}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignValidationErrorBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock HorizontalAlignment="Right" Text="{Binding Listing.Indexed, Converter={StaticResource TimeDifferenceToStringConverter}}" FontSize="12" ToolTip="{Binding Listing.Indexed.LocalDateTime}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Name="StatusBar" Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="5 1">
+                                    <TextBlock Visibility="{Binding Item.Influences.Crusader, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Text="Crusader" Margin="0 0 5 0" FontSize="11" Foreground="#c14e4e"/>
+                                    <TextBlock Visibility="{Binding Item.Influences.Redeemer, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Text="Redeemer" Margin="0 0 5 0" FontSize="11" Foreground="#aeaebe"/>
+                                    <TextBlock Visibility="{Binding Item.Influences.Hunter, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Text="Hunter"  Margin="0 0 5 0" FontSize="11" Foreground="#8ba54c"/>
+                                    <TextBlock Visibility="{Binding Item.Influences.Warlord, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Text="Warlord"  Margin="0 0 5 0" FontSize="11" Foreground="#e0be5a"/>
+                                    <TextBlock Visibility="{Binding Item.Influences.Shaper, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Text="Shaper"  Margin="0 0 5 0" FontSize="11" Foreground="#6d7abb"/>
+                                    <TextBlock Visibility="{Binding Item.Influences.Elder, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Text="Elder"  Margin="0 0 5 0" FontSize="11" Foreground="#6d7abb"/>
+                                    <TextBlock Visibility="{Binding Item.Veiled, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Veiled"  Margin="0 0 5 0" FontSize="11" Foreground="#90cbfc"/>
+                                    <TextBlock Visibility="{Binding Item.Fractured, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Fractured"  Margin="0 0 5 0" FontSize="11" Foreground="#90cbfc"/>
+                                    <TextBlock Visibility="{Binding Item.Synthesised, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Synthesised"  Margin="0 0 5 0" FontSize="11" Foreground="#90cbfc"/>
+                                    <TextBlock Visibility="{Binding Item.Duplicated, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Mirrored"  Margin="0 0 5 0" FontSize="11"  Foreground="#d20000"/>
+                                    <TextBlock Visibility="{Binding Item.Corrupted, Converter={StaticResource BooleanToVisibilityConverter}}" Text="Corrupted"  Margin="0 0 5 0" FontSize="11" Foreground="#d20000"/>
+                                    <TextBlock Visibility="{Binding Item.Identified, Converter={StaticResource InverseBoolToVisConverter}}" Text="Unidentified" FontSize="11"  Foreground="#d20000"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="5 1" HorizontalAlignment="Right">
+                                    <TextBlock Visibility="{Binding Item.ILVL, Converter={StaticResource NotZeroToVisibilityConverter}}" Text="{Binding Item.ILVL, StringFormat={}ilvl: {0}}" Margin="5 0 0 0" FontSize="11"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Name="Body" Grid.Row="2">
+                                <!--<Image RenderOptions.BitmapScalingMode="HighQuality" Source="{Binding Item.Icon}" Stretch="None"/>-->
+                            </Grid>
+                            <Grid Name="Footer" Grid.Row="3">
+                                <Button
+                                    materialDesign:ButtonAssist.CornerRadius="0"
+                                    BorderThickness="0 0 0 1"
+                                    FontSize="12"
+                                    Height="Auto"
+                                    Padding="10 2"
+                                    Margin="0"
+                                    Command="{s:Action Whisper}"
+                                    CommandParameter="{Binding}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                            <Setter Property="Content" Value="Whisper" />
+                                            <Style.Triggers>
+                                                <Trigger Property="Button.IsFocused" Value="True">
+                                                    <Setter Property="Content" Value="Copied!" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ProgressBar
+            Grid.Row="0"
+            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Style="{StaticResource MaterialDesignCircularProgressBar}"
+            Height="100"
+            Width="100"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            IsIndeterminate="True"/>
+        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                Grid.Row="1"
+                materialDesign:ButtonAssist.CornerRadius="0"
+                BorderThickness="0 1 0 0"
+                VerticalAlignment="Bottom"
+                Content="Open in Browser"
+                Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                Background="{DynamicResource PrimaryHueDarkBrush}"
+                Command="{s:Action OpenClassicTrade}"/>
+    </Grid>
+</mah:MetroWindow>
