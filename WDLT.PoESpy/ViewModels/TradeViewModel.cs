@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,8 +46,16 @@ namespace WDLT.PoESpy.ViewModels
 
         public void Whisper(POEFetchResult fetch)
         {
-            var text = fetch.Listing.Whisper;
-            Clipboard.SetText(text);
+            Clipboard.SetText(fetch.Listing.Whisper);
+        }
+
+        public void Copy(POEFetchResult fetch)
+        {
+            if (!string.IsNullOrWhiteSpace(fetch?.Item?.Extended?.Text))
+            {
+                var data = Convert.FromBase64String(fetch.Item.Extended.Text);
+                Clipboard.SetText(Encoding.UTF8.GetString(data));
+            }
         }
 
         public async void ScrollChanged(object sender, ScrollChangedEventArgs e)

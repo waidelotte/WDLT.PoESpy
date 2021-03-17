@@ -8,6 +8,8 @@ PoE Spy is Path of Exile Helper Tool
   - Items on Trade
 - Tools
   - Get Account name by Character name
+- Trade Search *(Custom View)*
+- Request limit Guard
   
 ### TODO
  - [ ] Spy Crafts

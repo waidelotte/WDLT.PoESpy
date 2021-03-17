@@ -15,26 +15,31 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        <ProgressBar
+            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Margin="0 -5 0 0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Grid.Row="0"
+            IsIndeterminate="True" />
         <DockPanel Grid.Row="0">
             <ComboBox
                 DockPanel.Dock="Left"
                 MinWidth="150"
                 VerticalAlignment="Stretch"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 VerticalContentAlignment="Center"
                 SelectedItem="{Binding SelectedOnline}"
-                materialDesign:TextFieldAssist.TextBoxViewMargin="5 0"
+                Padding="5 0"
                 ItemsSource="{Binding OnlineStatus}"/>
             <Button
                 DockPanel.Dock="Left"
                 IsDefault="True"
                 IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                materialDesign:ButtonProgressAssist.Value="-1"
-                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsLoading}"
-                materialDesign:ButtonProgressAssist.IsIndeterminate="True"
-                materialDesign:ShadowAssist.ShadowDepth="Depth0"
-                Style="{StaticResource MaterialDesignRaisedButton}"
+                Style="{StaticResource MaterialDesignFlatButton}"
                 materialDesign:ButtonAssist.CornerRadius="0"
                 BorderThickness="0 0 0 1"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 Content="Scan"
                 Command="{s:Action Scan}"/>
         </DockPanel>

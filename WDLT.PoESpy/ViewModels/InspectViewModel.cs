@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using ControlzEx.Standard;
 using MaterialDesignThemes.Wpf;
 using Stylet;
+using WDLT.Clients.POE;
 using WDLT.Clients.POE.Enums;
 using WDLT.Clients.POE.Models;
 using WDLT.PoESpy.Engine;
@@ -26,6 +29,7 @@ namespace WDLT.PoESpy.ViewModels
             {
                 SetAndNotify(ref _accountName, value);
                 NotifyOfPropertyChange(nameof(CanInspect));
+                Reset();
             }
         }
 
@@ -42,8 +46,6 @@ namespace WDLT.PoESpy.ViewModels
             Characters = new BindableCollection<POECharacter>();
         }
 
-        public bool CanInspect => !IsLoading && !string.IsNullOrWhiteSpace(AccountName);
-
         public void OpenTrade()
         {
             if(TradeResult == null) return;
@@ -51,11 +53,39 @@ namespace WDLT.PoESpy.ViewModels
             _windowManager.OpenTradeWindow(TradeResult, Settings.Default.League);
         }
 
+        public bool CanOpenProfile => !string.IsNullOrWhiteSpace(AccountName);
+        public void OpenProfile()
+        {
+            Process.Start("cmd", $"/C start {POEClient.BASE}/account/view-profile/{AccountName}");
+        }
+
+        public bool CanInspect => !string.IsNullOrWhiteSpace(AccountName);
         public Task Inspect()
         {
             return LoadingTask(InspectTask);
         }
-        
+
+        public async void Handle(InspectEvent message)
+        {
+            if (IsLoading) return;
+
+            ActivateTab();
+
+            AccountName = message.Account;
+            await LoadingTask(InspectTask);
+        }
+
+        public void Handle(LeagueChangedEvent message)
+        {
+            Reset();
+        }
+
+        private void Reset()
+        {
+            TradeResult = null;
+            Characters.Clear();
+        }
+
         private async Task InspectTask()
         {
             Characters.Clear();
@@ -75,22 +105,6 @@ namespace WDLT.PoESpy.ViewModels
             {
                 _snackQueue.Enqueue($"Account [{acc}] does not exist");
             }
-        }
-
-        public async void Handle(InspectEvent message)
-        {
-            if(IsLoading) return;
-
-            ActivateTab();
-
-            AccountName = message.Account;
-            await LoadingTask(InspectTask);
-        }
-
-        public void Handle(LeagueChangedEvent message)
-        {
-            TradeResult = null;
-            Characters.Clear();
         }
     }
 }

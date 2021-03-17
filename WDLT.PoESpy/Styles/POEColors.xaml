@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <SolidColorBrush x:Key="POEMagic" Color="#8888ff"/>
+    <SolidColorBrush x:Key="POERare" Color="#ffff77"/>
+    <SolidColorBrush x:Key="POEUnique" Color="#af6025"/>
+    <SolidColorBrush x:Key="POEGem" Color="#1ba29b"/>
+    <SolidColorBrush x:Key="POECurrency" Color="#aa9e82"/>
+    <SolidColorBrush x:Key="POERelic" Color="#82ad6a"/>
+    <SolidColorBrush x:Key="POEProphecy" Color="#b54bff"/>
+    <SolidColorBrush x:Key="POECorrupted" Color="#d20000"/>
+    <SolidColorBrush x:Key="POEQuest" Color="#4ae63a"/>
+    <SolidColorBrush x:Key="POECrafted" Color="#b4b4ff"/>
+    <SolidColorBrush x:Key="POESeparator" Color="#85612a"/>
+    <SolidColorBrush x:Key="PoeCaption" Color="#7f7f7f"/>
+
+</ResourceDictionary>

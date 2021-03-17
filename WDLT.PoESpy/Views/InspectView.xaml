@@ -15,39 +15,42 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <ProgressBar
+            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Margin="0 -5 0 0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Grid.Row="0"
+            IsIndeterminate="True" />
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60*"/>
-                <ColumnDefinition Width="40*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox
                 materialDesign:TextFieldAssist.TextBoxViewMargin="5 0"
                 Grid.Column="0"
-                Height="40"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolToVisConverter}}"
                 Text="{Binding AccountName, UpdateSourceTrigger=PropertyChanged}"
                 materialDesign:HintAssist.Hint="Account"
                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
             <Button
                 Grid.Column="1"
-                IsEnabled="{Binding CanInspect}"
-                materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsLoading}"
-                materialDesign:ButtonProgressAssist.IsIndeterminate="True"
-                materialDesign:ShadowAssist.ShadowDepth="Depth0"
-                Height="40"
+                Height="Auto"
                 IsDefault="True"
-                Style="{StaticResource MaterialDesignRaisedButton}"
-                materialDesign:ButtonAssist.CornerRadius="0"
-                Content="Search"
-                Command="{s:Action Inspect}"/>
+                BorderThickness="0 0 0 1"
+                ToolTip="Search"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                Command="{s:Action Inspect}"
+                materialDesign:ButtonAssist.CornerRadius="0">
+                <materialDesign:PackIcon Kind="AccountSearch" />
+            </Button>
         </Grid>
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60*"/>
-                <ColumnDefinition Width="40*"/>
-            </Grid.ColumnDefinitions>
             <DataGrid
-                Grid.Column="0"
                 ItemsSource="{Binding Characters}"
                 SelectionMode="Single"
                 SelectionUnit="Cell"
@@ -87,18 +90,24 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
-        <Grid Grid.Row="2" Visibility="{Binding TradeResult, Converter={StaticResource NullVisibilityConverter}}">
-            <!--<Grid.ColumnDefinitions>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-            </Grid.ColumnDefinitions>-->
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
             <Button Style="{StaticResource MaterialDesignOutlinedButton}"
                     Grid.Column="0"
                     materialDesign:ButtonAssist.CornerRadius="0"
+                    BorderThickness="0 1 1 0"
+                    Content="Profile"
+                    Command="{s:Action OpenProfile}"/>
+            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Grid.Column="1"
+                    materialDesign:ButtonAssist.CornerRadius="0"
                     BorderThickness="0 1 0 0"
-                    VerticalAlignment="Bottom"
                     Command="{s:Action OpenTrade}"
-                    IsEnabled="{Binding TradeResult.Total, Converter={StaticResource NotZeroConverter}}">
-                <TextBlock Text="{Binding TradeResult.Total, StringFormat={}Items on Trade: {0}}"/>
+                    IsEnabled="{Binding TradeResult.Total, Converter={StaticResource NotZeroConverter}, FallbackValue=False}">
+                <TextBlock Text="{Binding TradeResult.Total, StringFormat={}Items on Trade: {0}, FallbackValue=Items on Trade}"/>
             </Button>
         </Grid>
     </Grid>

@@ -8,7 +8,6 @@ using WDLT.PoESpy.Engine;
 using WDLT.PoESpy.Enums;
 using WDLT.PoESpy.Events;
 using WDLT.PoESpy.Models;
-using WDLT.PoESpy.Services;
 using WDLT.Utils.Extensions;
 
 namespace WDLT.PoESpy.ViewModels
@@ -33,17 +32,17 @@ namespace WDLT.PoESpy.ViewModels
             };
         }
 
-        public async Task Scan()
+        public Task Scan()
         {
-            IsLoading = true;
+            return LoadingTask(ScanTask);
+        }
 
+        public async Task ScanTask()
+        {
             Items.Clear();
 
             await Search(true);
             await Search(false);
-
-            IsLoading = false;
-
         }
 
         public void Inspect(MoneywayItem item)

@@ -31,18 +31,19 @@ namespace WDLT.PoESpy.ViewModels
             _exileEngine = exileEngine;
         }
 
-        public async Task AccountSearch()
+        public Task AccountSearch()
         {
-            IsLoading = true;
+            return LoadingTask(AccountSearchTask);
+        }
 
+        private async Task AccountSearchTask()
+        {
             var result = await _exileEngine.AccountNameByCharacter(CharacterName.Trim());
 
             if (result != null)
             {
                 AccountSearchResult = result.AccountName;
             }
-
-            IsLoading = false;
         }
     }
 }

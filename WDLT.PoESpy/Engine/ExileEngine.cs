@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using MaterialDesignThemes.Wpf;
-using RestSharp.Extensions;
-using Stylet;
 using Swordfish.NET.Collections;
 using WDLT.Clients.POE;
 using WDLT.Clients.POE.Enums;
@@ -25,12 +22,10 @@ namespace WDLT.PoESpy.Engine
 
         private readonly POEClient _client;
         private readonly ISnackbarMessageQueue _snackbarMessageQueue;
-        private readonly IEventAggregator _eventAggregator;
 
-        public ExileEngine(ISnackbarMessageQueue snackbarMessageQueue, IEventAggregator eventAggregator)
+        public ExileEngine(ISnackbarMessageQueue snackbarMessageQueue)
         {
             _snackbarMessageQueue = snackbarMessageQueue;
-            _eventAggregator = eventAggregator;
             _client = new POEClient(Settings.Default.UserAgent);
             RateLimits = new ConcurrentObservableCollection<RateLimitTimer>();
         }

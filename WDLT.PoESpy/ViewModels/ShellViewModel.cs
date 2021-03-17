@@ -18,8 +18,6 @@ namespace WDLT.PoESpy.ViewModels
 {
     public class ShellViewModel : Conductor<IScreen>.Collection.OneActive, IHandle<ActivateTabEvent>
     {
-        public static ShellViewModel Instance;
-
         public bool IsInitDone { get; private set; }
         public ExileEngine ExileEngine { get; }
         public ISnackbarMessageQueue SnackbarMessageQueue { get; }
@@ -28,8 +26,6 @@ namespace WDLT.PoESpy.ViewModels
 
         public ShellViewModel(ISnackbarMessageQueue snackQueue, IEventAggregator eventAggregator, IEnumerable<BaseTabViewModel> tabs, ExileEngine exileEngine)
         {
-            Instance = this;
-
             DisplayName = $"PoE Spy v.{GetType().Assembly.GetName().Version}";
 
             Items.AddRange(tabs.OrderBy(o => o.Tab));

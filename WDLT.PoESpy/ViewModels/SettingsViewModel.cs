@@ -6,7 +6,6 @@ using WDLT.PoESpy.Engine;
 using WDLT.PoESpy.Enums;
 using WDLT.PoESpy.Events;
 using WDLT.PoESpy.Properties;
-using WDLT.PoESpy.Services;
 
 namespace WDLT.PoESpy.ViewModels
 {

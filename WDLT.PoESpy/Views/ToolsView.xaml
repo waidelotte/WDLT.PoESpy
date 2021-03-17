@@ -28,6 +28,7 @@
             <Button
                 Grid.Column="1"
                 Content="Search"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
                 Style="{StaticResource MaterialDesignFlatButton}"
                 Command="{s:Action AccountSearch}"/>
             <TextBox

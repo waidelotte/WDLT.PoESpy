@@ -21,7 +21,6 @@
                  xmlns:viewModels="clr-namespace:WDLT.PoESpy.ViewModels"
                  xmlns:properties="clr-namespace:WDLT.PoESpy.Properties"
                  d:DataContext="{d:DesignInstance viewModels:ShellViewModel}">
-
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands ShowLastSeparator="True">
             <Button ToolTip="Open Trade" Command="{s:Action OpenTrade}">
@@ -57,13 +56,15 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <mah:MetroAnimatedSingleRowTabControl ItemsSource="{Binding Items}" SelectedItem="{Binding ActiveItem}" DisplayMemberPath="DisplayName" mah:HeaderedControlHelper.HeaderFontSize="14" mah:TabControlHelper.Underlined="TabPanel" >
-                    <mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
+                <mah:MetroTabControl ItemsSource="{Binding Items}" SelectedItem="{Binding ActiveItem}" DisplayMemberPath="DisplayName" mah:HeaderedControlHelper.HeaderFontSize="14" mah:TabControlHelper.Underlined="TabPanel" >
+                    <mah:MetroTabControl.ContentTemplate>
                         <DataTemplate>
-                            <ContentControl s:View.Model="{Binding}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" IsTabStop="False"/>
+                            <Border BorderThickness="0 5 0 0" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                                <ContentControl s:View.Model="{Binding}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" IsTabStop="False"/>
+                            </Border>
                         </DataTemplate>
-                    </mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
-                </mah:MetroAnimatedSingleRowTabControl>
+                    </mah:MetroTabControl.ContentTemplate>
+                </mah:MetroTabControl>
             </Grid>
             <ItemsControl ItemsSource="{Binding ExileEngine.RateLimits.CollectionView}" VerticalAlignment="Bottom" Grid.Row="1">
                 <ItemsControl.ItemTemplate>

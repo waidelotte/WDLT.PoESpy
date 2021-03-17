@@ -19,6 +19,7 @@
                     <convertors:InverseBooleanConverter x:Key="InverseBooleanConverter" />
                     <convertors:CurrencyToImageConverter x:Key="ImageCacheConverter" />
                     <convertors:TimeDifferenceToStringConverter x:Key="TimeDifferenceToStringConverter" />
+                    <convertors:SocketGroupConverter x:Key="SocketGroupConverter" />
                 </ResourceDictionary>
 
                 <!-- MahApps -->
@@ -35,7 +36,9 @@
                 <!-- Material Design: MahApps Compatibility -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Defaults.xaml" />
 
+                <ResourceDictionary Source="Styles/POEColors.xaml"/>
                 <ResourceDictionary Source="Styles/Generic.xaml"/>
+                <ResourceDictionary Source="Styles/Controls/PropertyTextblockControl.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- MahApps Brushes -->
