@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Windows;
 using MaterialDesignThemes.Wpf;
 using Stylet;
 using StyletIoC;
 using WDLT.PoESpy.Engine;
 using WDLT.PoESpy.Helpers;
 using WDLT.PoESpy.Interfaces;
-using WDLT.PoESpy.Services;
 using WDLT.PoESpy.ViewModels;
 
 namespace WDLT.PoESpy

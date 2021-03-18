@@ -4,6 +4,7 @@
     {
         Moneyway,
         Inspect,
+        Search,
         Tools,
         Settings
     }
