@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WDLT.Clients.POE\WDLT.Clients.POE\WDLT.Clients.POE.csproj" />
     <ProjectReference Include="..\WDLT.Utils\WDLT.Utils\WDLT.Utils.csproj" />
   </ItemGroup>
 
