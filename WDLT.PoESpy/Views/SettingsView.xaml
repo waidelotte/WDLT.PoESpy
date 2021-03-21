@@ -10,12 +10,7 @@
              mc:Ignorable="d">
     <Grid>
         <StackPanel Margin="10">
-            <ComboBox
-                VerticalAlignment="Top"
-                SelectedItem="{Binding SelectedLeague}"
-                ItemsSource="{Binding Leagues}"/>
             <TextBox
-                Margin="0 5 0 0"
                 FontFamily="/Resources/#password" 
                 materialDesign:HintAssist.Hint="POESESSID"
                 materialDesign:HintAssist.FontFamily="Arial"

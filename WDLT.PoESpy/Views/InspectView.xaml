@@ -22,26 +22,36 @@
             VerticalAlignment="Top"
             Grid.Row="0"
             IsIndeterminate="True" />
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox
-                materialDesign:TextFieldAssist.TextBoxViewMargin="5 0"
+                Padding="5"
                 Grid.Column="0"
                 BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolToVisConverter}}"
                 Text="{Binding AccountName, UpdateSourceTrigger=PropertyChanged}"
                 materialDesign:HintAssist.Hint="Account"
                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+            <ComboBox ItemsSource="{Binding ExileEngine.Leagues, Mode=OneWay}"
+                      Grid.Column="1"
+                      VerticalContentAlignment="Bottom"
+                      VerticalAlignment="Stretch"
+                      Height="Auto"
+                      BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                      materialDesign:HintAssist.Hint="League"
+                      materialDesign:HintAssist.HintOpacity=".25"
+                      SelectedValue="{Binding SelectedLeague}"
+                      SelectedValuePath="Text"
+                      DisplayMemberPath="Text" />
             <Button
-                Grid.Column="1"
+                Grid.Column="2"
                 Height="Auto"
                 IsDefault="True"
                 BorderThickness="0 0 0 1"
                 ToolTip="Search"
-                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
                 BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 Style="{StaticResource MaterialDesignFlatButton}"
                 Command="{s:Action Inspect}"
@@ -80,7 +90,6 @@
                     <DataGridTextColumn
                         Binding="{Binding Class}"
                         Header="Class"
-
                         Width="Auto"/>
                     <DataGridTextColumn
                         Binding="{Binding Level}"
@@ -105,8 +114,7 @@
                     Grid.Column="1"
                     materialDesign:ButtonAssist.CornerRadius="0"
                     BorderThickness="0 1 0 0"
-                    Command="{s:Action OpenTrade}"
-                    IsEnabled="{Binding TradeResult.Total, Converter={StaticResource NotZeroConverter}, FallbackValue=False}">
+                    Command="{s:Action OpenTrade}">
                 <TextBlock Text="{Binding TradeResult.Total, StringFormat={}Items on Trade: {0}, FallbackValue=Items on Trade}"/>
             </Button>
         </Grid>

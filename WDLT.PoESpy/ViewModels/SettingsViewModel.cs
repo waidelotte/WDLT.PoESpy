@@ -11,22 +11,7 @@ namespace WDLT.PoESpy.ViewModels
 {
     public class SettingsViewModel : BaseTabViewModel, IHandle<AppLoadedEvent>
     {
-        public BindableCollection<string> Leagues { get; private set; }
-
-        private string _selectedLeague;
-        public string SelectedLeague
-        {
-            get => _selectedLeague;
-            set
-            {
-                if (_selectedLeague != value)
-                {
-                    EventAggregator.Publish(new LeagueChangedEvent());
-                }
-
-                SetAndNotify(ref _selectedLeague, value);
-            }
-        }
+        public ExileEngine ExileEngine { get; }
 
         private string _poesessid;
         public string POESESSID
@@ -34,44 +19,33 @@ namespace WDLT.PoESpy.ViewModels
             get => _poesessid;
             set
             {
-                _exileEngine.SetSession(value);
+                ExileEngine.SetSession(value);
                 SetAndNotify(ref _poesessid, value);
             }
         }
 
         private readonly ISnackbarMessageQueue _snackbarMessageQueue;
-        private readonly ExileEngine _exileEngine;
 
         public SettingsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Settings, eventAggregator)
         {
             _snackbarMessageQueue = snackbarMessageQueue;
-            _exileEngine = exileEngine;
+            ExileEngine = exileEngine;
         }
 
         public void Handle(AppLoadedEvent message)
         {
-            POESESSID = Settings.Default.POESESSID;
-
-            if (string.IsNullOrWhiteSpace(POESESSID))
+            if (string.IsNullOrWhiteSpace(Settings.Default.POESESSID))
             {
                 _snackbarMessageQueue.Enqueue("We strongly recommend specifying POESESSID in the Settings");
             }
-
-            Leagues = new BindableCollection<string>(_exileEngine.Leagues.Select(s => s.Text));
-
-            if (Settings.Default.League != null && Leagues.Contains(Settings.Default.League))
-            {
-                SelectedLeague = Settings.Default.League;
-            }
             else
             {
-                SelectedLeague = Leagues.FirstOrDefault();
+                POESESSID = Settings.Default.POESESSID;
             }
         }
 
         protected override void OnDeactivate()
         {
-            Settings.Default.League = SelectedLeague;
             Settings.Default.POESESSID = POESESSID;
 
             Settings.Default.Save();

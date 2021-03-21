@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
-using WDLT.Clients.POE.Enums;
 using WDLT.Utils.Extensions;
 
 namespace WDLT.PoESpy.Services

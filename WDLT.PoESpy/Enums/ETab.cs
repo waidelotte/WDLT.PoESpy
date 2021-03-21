@@ -4,7 +4,7 @@
     {
         Moneyway,
         Inspect,
-        Search,
+        Sniper,
         Tools,
         Settings
     }

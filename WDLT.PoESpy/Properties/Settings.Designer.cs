@@ -63,18 +63,6 @@ namespace WDLT.PoESpy.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string League {
-            get {
-                return ((string)(this["League"]));
-            }
-            set {
-                this["League"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string POESESSID {
             get {
                 return ((string)(this["POESESSID"]));

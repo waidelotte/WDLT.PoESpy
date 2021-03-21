@@ -1,6 +1,0 @@
-[submodule "WDLT.Utils"]
-	path = WDLT.Utils
-	url = https://github.com/waidelotte/WDLT.Utils
-[submodule "WDLT.Clients.POE"]
-	path = WDLT.Clients.POE
-	url = https://github.com/waidelotte/WDLT.Clients.POE

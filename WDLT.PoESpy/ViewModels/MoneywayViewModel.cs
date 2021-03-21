@@ -12,17 +12,18 @@ using WDLT.Utils.Extensions;
 
 namespace WDLT.PoESpy.ViewModels
 {
-    public class MoneywayViewModel : BaseTabViewModel, IHandle<LeagueChangedEvent>
+    public class MoneywayViewModel : BaseTabViewModel
     {
+        public ExileEngine ExileEngine { get; }
+
         public BindableCollection<MoneywayItem> Items { get; }
         public List<EPOEOnlineStatus> OnlineStatus { get; }
         public EPOEOnlineStatus SelectedOnline { get; set; }
-
-        private readonly ExileEngine _exileEngine;
+        public string SelectedLeague { get; set; }
 
         public MoneywayViewModel(IEventAggregator eventAggregator, ExileEngine exileEngine) : base(ETab.Moneyway, eventAggregator)
         {
-            _exileEngine = exileEngine;
+            ExileEngine = exileEngine;
             Items = new BindableCollection<MoneywayItem>();
 
             OnlineStatus = new List<EPOEOnlineStatus>
@@ -32,6 +33,7 @@ namespace WDLT.PoESpy.ViewModels
             };
         }
 
+        public bool CanScan => !IsLoading && !string.IsNullOrWhiteSpace(SelectedLeague);
         public Task Scan()
         {
             return LoadingTask(ScanTask);
@@ -47,20 +49,15 @@ namespace WDLT.PoESpy.ViewModels
 
         public void Inspect(MoneywayItem item)
         {
-            EventAggregator.Publish(new InspectEvent(item.Account.Name));
-        }
-
-        public void Handle(LeagueChangedEvent message)
-        {
-            Items.Clear();
+            EventAggregator.Publish(new InspectEvent(item.Account.Name, item.League));
         }
 
         private async Task Search(bool useMirror)
         {
             var mirror = "Mirror of Kalandra";
             var exalt = "Exalted Orb";
-
-            var search = await _exileEngine.SearchAsync(new POESearchPayload
+            
+            var search = await ExileEngine.SearchAsync(SelectedLeague, new POESearchPayload
             {
                 Sort = new POESearchSort
                 {
@@ -73,7 +70,7 @@ namespace WDLT.PoESpy.ViewModels
             
             foreach (var ids in search.Result.Take(50).Chunk(10))
             {
-                var fetch = await _exileEngine.FetchAsync(ids);
+                var fetch = await ExileEngine.FetchAsync(ids);
                 if (fetch == null) break;
 
                 foreach (var sr in fetch.Result)
@@ -82,7 +79,7 @@ namespace WDLT.PoESpy.ViewModels
 
                     if (item == null)
                     {
-                        item = new MoneywayItem(sr.Listing.Account);
+                        item = new MoneywayItem(sr.Listing.Account, sr.Item.League);
                         Items.Add(item);
                     }
 

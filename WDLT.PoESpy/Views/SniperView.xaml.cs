@@ -2,9 +2,9 @@
 
 namespace WDLT.PoESpy.Views
 {
-    public partial class SearchView : UserControl
+    public partial class SniperView : UserControl
     {
-        public SearchView()
+        public SniperView()
         {
             InitializeComponent();
         }

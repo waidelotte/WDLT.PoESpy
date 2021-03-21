@@ -46,16 +46,12 @@ namespace WDLT.PoESpy.ViewModels
 
         public void Whisper(POEFetchResult fetch)
         {
-            Clipboard.SetText(fetch.Listing.Whisper);
+            fetch.ClipboardSetWhisper();
         }
 
         public void Copy(POEFetchResult fetch)
         {
-            if (!string.IsNullOrWhiteSpace(fetch?.Item?.Extended?.Text))
-            {
-                var data = Convert.FromBase64String(fetch.Item.Extended.Text);
-                Clipboard.SetText(Encoding.UTF8.GetString(data));
-            }
+            fetch.ClipboardSetItem();
         }
 
         public async void ScrollChanged(object sender, ScrollChangedEventArgs e)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MaterialDesignThemes.Wpf;
+using Stylet;
 using Swordfish.NET.Collections;
 using WDLT.Clients.POE;
 using WDLT.Clients.POE.Enums;
@@ -17,7 +18,7 @@ namespace WDLT.PoESpy.Engine
     public class ExileEngine
     {
         public ConcurrentObservableCollection<RateLimitTimer> RateLimits { get; }
-        public List<POELeague> Leagues { get; private set; }
+        public BindableCollection<POELeague> Leagues { get; }
         public List<POEStatic> Static { get; private set; }
 
         private readonly POEClient _client;
@@ -28,13 +29,14 @@ namespace WDLT.PoESpy.Engine
             _snackbarMessageQueue = snackbarMessageQueue;
             _client = new POEClient(Settings.Default.UserAgent);
             RateLimits = new ConcurrentObservableCollection<RateLimitTimer>();
+            Leagues = new BindableCollection<POELeague>();
         }
 
         public async Task<bool> InitAsync()
         {
             var leagues = await CanBeExceptionAsync(() => _client.TradeLeaguesAsync(), "api-trade-leagues");
             if(leagues == null) return false;
-            Leagues = leagues.Result;
+            Leagues.AddRange(leagues.Result);
 
             var st = await CanBeExceptionAsync(() => _client.TradeStaticAsync(), "api-trade-static");
             if (st == null) return false;
@@ -56,9 +58,14 @@ namespace WDLT.PoESpy.Engine
             _client.POESESSID = id;
         }
 
-        public Task<POESearchResult> SearchAsync(POESearchPayload payload)
+        public string GetSession()
         {
-            return CanBeExceptionAsync(() => _client.TradeSearchAsync(Settings.Default.League, payload), "api-trade-search");
+            return _client.POESESSID;
+        }
+
+        public Task<POESearchResult> SearchAsync(string league, POESearchPayload payload)
+        {
+            return CanBeExceptionAsync(() => _client.TradeSearchAsync(league, payload), "api-trade-search");
         }
 
         public Task<List<POECharacter>> Characters(string account)
@@ -71,9 +78,9 @@ namespace WDLT.PoESpy.Engine
             return CanBeExceptionAsync(() => _client.AccountNameByCharacter(character), "api-accbychar");
         }
 
-        public Task<POESearchResult> SearchByAccountAsync(string account, EPOESort sort, EPOEOnlineStatus online)
+        public Task<POESearchResult> SearchByAccountAsync(string account, string league, EPOESort sort, EPOEOnlineStatus online)
         {
-            return SearchAsync(new POESearchPayload
+            return SearchAsync(league, new POESearchPayload
             {
                 Sort = new POESearchSort
                 {
