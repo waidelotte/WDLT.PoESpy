@@ -57,6 +57,18 @@
                     </Style>
                 </Grid.Style>
                 <mah:MetroTabControl ItemsSource="{Binding Items}" SelectedItem="{Binding ActiveItem}" DisplayMemberPath="DisplayName" mah:HeaderedControlHelper.HeaderFontSize="14" mah:TabControlHelper.Underlined="TabPanel" >
+                    <mah:MetroTabControl.Resources>
+                        <Style TargetType="{x:Type mah:MetroTabItem}">
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Opacity" Value="1"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                    <Setter Property="Opacity" Value="0.35"/>
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </mah:MetroTabControl.Resources>
                     <mah:MetroTabControl.ContentTemplate>
                         <DataTemplate>
                             <Border BorderThickness="0 5 0 0" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
@@ -66,13 +78,12 @@
                     </mah:MetroTabControl.ContentTemplate>
                 </mah:MetroTabControl>
             </Grid>
-            <ItemsControl ItemsSource="{Binding ExileEngine.RateLimits.CollectionView}" VerticalAlignment="Bottom" Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding RateLimits}" VerticalAlignment="Bottom" Grid.Row="1">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                             <ProgressBar Value="{Binding RemainingPercent, Mode=OneWay}" Height="15"/>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="15" Margin="5 0">
-                                <TextBlock Text="{Binding RateLimit.Type, StringFormat={}{0} limit:}" Margin="0 0 3 0" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"/>
                                 <TextBlock Text="{Binding Endpoint}" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" Margin="0 0 3 0"/>
                                 <TextBlock Text="{Binding Remaining,StringFormat={}({0}s.)}" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"/>
                             </StackPanel>

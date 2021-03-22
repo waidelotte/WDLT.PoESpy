@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace WDLT.PoESpy.Models
+namespace WDLT.PoESpy.Engine.Models
 {
-    public class ExileWebSocketMessage
+    public class ExileTradeWebSocketMessage
     {
         [JsonProperty("auth")]
         public bool? Auth { get; set; }

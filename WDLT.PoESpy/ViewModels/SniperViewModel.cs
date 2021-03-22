@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
+using System.Windows;
 using MaterialDesignThemes.Wpf;
 using Newtonsoft.Json;
 using Stylet;
 using Swordfish.NET.Collections;
-using WDLT.Clients.POE;
 using WDLT.Clients.POE.Models;
 using WDLT.PoESpy.Engine;
+using WDLT.PoESpy.Engine.Models;
 using WDLT.PoESpy.Enums;
 using WDLT.PoESpy.Events;
 using WDLT.PoESpy.Models;
@@ -19,45 +18,35 @@ using WDLT.Utils.Extensions;
 
 namespace WDLT.PoESpy.ViewModels
 {
-    public class SniperViewModel : BaseTabViewModel, IHandle<AppLoadedEvent>
+    public class SniperViewModel : BaseTabViewModel, IHandle<POESESSIDChangedEvent>, IHandle<LeaguesLoadedEvent>
     {
-        public BindableCollection<POEFetchResult> TradeItems { get;}
-        public ConcurrentObservableCollection<ExileWebSocket> WebSockets { get; }
-        public ExileEngine ExileEngine { get; }
         public string SelectedLeague { get; set; }
+
         public string Query { get; set; }
+
         public string Name { get; set; }
 
-        private readonly Func<ClientWebSocket> _wsFactory;
-        private readonly ISnackbarMessageQueue _snackbarMessageQueue;
+        public List<POELeague> Leagues { get; private set; }
+
+        public BindableCollection<POEFetchResult> TradeItems { get;}
+
+        public ConcurrentObservableCollection<AppWebSocket> WebSockets { get; }
+
+        private readonly ExileEngine _exileEngine;
+
         private readonly Queue<string> _messageQueue;
 
-        public SniperViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Sniper, eventAggregator)
+        private readonly string _saveFile = "ws.json";
+
+        private ExileTradeWebSocketManager _exileWebSocketManager;
+
+        public SniperViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Sniper, eventAggregator, snackbarMessageQueue)
         {
-            _snackbarMessageQueue = snackbarMessageQueue;
             _messageQueue = new Queue<string>();
-            ExileEngine = exileEngine;
+            _exileEngine = exileEngine;
 
-            _wsFactory = () =>
-            {
-                var client = new ClientWebSocket();
-
-                client.Options.SetRequestHeader("User-Agent", Settings.Default.UserAgent);
-                client.Options.SetRequestHeader("Origin", POEClient.BASE);
-                client.Options.SetRequestHeader("Cookie", $"POESESSID={ExileEngine.GetSession()}");
-
-                return client;
-            };
-
-            WebSockets = new ConcurrentObservableCollection<ExileWebSocket>();
             TradeItems = new BindableCollection<POEFetchResult>();
-        }
-
-        protected override void OnInitialActivate()
-        {
-            MessageLoader();
-
-            base.OnInitialActivate();
+            WebSockets = new ConcurrentObservableCollection<AppWebSocket>();
         }
 
         public void ClearTradeItems()
@@ -67,15 +56,47 @@ namespace WDLT.PoESpy.ViewModels
 
         public void Whisper(POEFetchResult fetch)
         {
-            fetch.ClipboardSetWhisper();
+            Clipboard.SetText(fetch.WhisperText());
         }
 
         public void Copy(POEFetchResult fetch)
         {
-            fetch.ClipboardSetItem();
+            Clipboard.SetText(fetch.RawItemText());
         }
 
-        public async void MessageLoader()
+        public async Task Stop()
+        {
+            if (_exileWebSocketManager != null) await _exileWebSocketManager.StopAll();
+        }
+
+        public bool CanStart => _exileWebSocketManager != null;
+        public async Task Start()
+        {
+            if (_exileWebSocketManager != null) await _exileWebSocketManager.StartAll();
+        }
+
+        public async Task Remove(AppWebSocket ws)
+        {
+            if(ws == null) return;
+
+            await _exileWebSocketManager.Stop(ws.Name);
+
+            if (_exileWebSocketManager.Remove(ws.Name)) WebSockets.Remove(ws);
+        }
+
+        public bool CanAdd => !string.IsNullOrWhiteSpace(SelectedLeague) && !string.IsNullOrWhiteSpace(Query) && !string.IsNullOrWhiteSpace(Name);
+        public void Add()
+        {
+            if (_exileWebSocketManager != null && _exileWebSocketManager.Add(new ExileTradeWebSocketSetting(SelectedLeague, Query, Name)))
+            {
+                WebSockets.Add(new AppWebSocket(Name));
+
+                Query = null;
+                Name = null;
+            }
+        }
+
+        public async void IDLoaderLoop()
         {
             while (true)
             {
@@ -83,7 +104,7 @@ namespace WDLT.PoESpy.ViewModels
 
                 if (queue.Any())
                 {
-                    var result = await ExileEngine.FetchAsync(queue);
+                    var result = await _exileEngine.FetchAsync(queue);
 
                     if (result != null)
                     {
@@ -93,7 +114,7 @@ namespace WDLT.PoESpy.ViewModels
                         foreach (var item in items)
                         {
                             TradeItems.Insert(0, item);
-                            if(TradeItems.Count > 100) TradeItems.RemoveAt(TradeItems.Count - 1);
+                            if (TradeItems.Count > 100) TradeItems.RemoveAt(TradeItems.Count - 1);
                         }
                     }
                 }
@@ -102,122 +123,113 @@ namespace WDLT.PoESpy.ViewModels
             }
         }
 
-        public async Task RemoveWebSocket(ExileWebSocket ws)
+        public void Handle(POESESSIDChangedEvent message)
         {
-            if(ws == null) return;
+            List<ExileTradeWebSocketSetting> tempSettings = null;
+            TradeItems.Clear();
+            WebSockets.Clear();
 
-            if (await StopWebSocket(ws))
+            if (_exileWebSocketManager != null)
             {
-                WebSockets.Remove(ws);
-            }
-        }
-
-        public async Task StopAll()
-        {
-            foreach (var webSocket in WebSockets)
-            {
-                await StopWebSocket(webSocket);
-            }
-        }
-
-        public async Task StartAll()
-        {
-            foreach (var webSocket in WebSockets)
-            {
-                await StartWebSocket(webSocket);
-            }
-        }
-
-        private async Task<bool> StopWebSocket(ExileWebSocket webSocket)
-        {
-            try
-            {
-                await webSocket.Stop();
-                return true;
-            }
-            catch (Exception)
-            {
-                _snackbarMessageQueue.Enqueue($"Failed to stop [{webSocket.Setting.Name}][{webSocket.Setting.Query}]", null, null, null, false, false, TimeSpan.FromSeconds(3));
-                return false;
-            }
-        }
-
-        private async Task<bool> StartWebSocket(ExileWebSocket webSocket)
-        {
-            try
-            {
-                await webSocket.Start();
-                return true;
-            }
-            catch (Exception)
-            {
-                _snackbarMessageQueue.Enqueue($"Failed to start [{webSocket.Setting.Name}][{webSocket.Setting.Query}]", null, null, null, false, false, TimeSpan.FromSeconds(3));
-                return false;
-            }
-        }
-
-        public bool CanTryAdd => !string.IsNullOrWhiteSpace(SelectedLeague) && !string.IsNullOrWhiteSpace(Query) && !string.IsNullOrWhiteSpace(Name) && WebSockets.Count < 19;
-        public void TryAdd()
-        {
-            if (Add(new ExileWebSocketSetting
-            {
-                League = SelectedLeague,
-                Name = Name.Trim(),
-                Query = Query.Trim()
-            }))
-            {
-
-                Query = null;
-                Name = null;
-            }
-        }
-
-        private bool Add(ExileWebSocketSetting setting)
-        {
-            if (string.IsNullOrWhiteSpace(ExileEngine.GetSession()))
-            {
-                _snackbarMessageQueue.Enqueue("You must specify POESESSID in the Settings", null, null, null, false, false, TimeSpan.FromSeconds(2));
-                return false;
+                _exileWebSocketManager.OnLogMessageEvent -= OnLogMessage;
+                _exileWebSocketManager.OnNewIdRecievedEvent -= OnNewIdRecieved;
+                _exileWebSocketManager.OnWebSocketConnectedEvent -= OnWebSocketConnected;
+                _exileWebSocketManager.OnWebSocketDisconnectedEvent -= OnWebSocketDisconnected;
+                tempSettings = _exileWebSocketManager.Settings();
+                _exileWebSocketManager.Dispose();
+                _exileWebSocketManager = null;
             }
 
-            if (WebSockets.Count >= 19)
+            if (!string.IsNullOrWhiteSpace(message.NewValue))
             {
-                _snackbarMessageQueue.Enqueue("Limit reached [19/19]", null, null, null, false, false, TimeSpan.FromSeconds(3));
-                return false;
-            }
+                IsEnabled = true;
 
-            var ws = new ExileWebSocket(setting, _wsFactory)
-            {
-                MessageRecieved = s => _messageQueue.Enqueue(s)
-            };
+                _exileWebSocketManager = new ExileTradeWebSocketManager(19, message.NewValue, Settings.Default.UserAgent);
+                _exileWebSocketManager.OnLogMessageEvent += OnLogMessage;
+                _exileWebSocketManager.OnNewIdRecievedEvent += OnNewIdRecieved;
+                _exileWebSocketManager.OnWebSocketConnectedEvent += OnWebSocketConnected;
+                _exileWebSocketManager.OnWebSocketDisconnectedEvent += OnWebSocketDisconnected;
 
-            WebSockets.Add(ws);
-            return true;
-        }
-
-        public void Handle(AppLoadedEvent message)
-        {
-            if (!File.Exists("ws.json")) return;
-
-            try
-            {
-                var des = JsonConvert.DeserializeObject<IEnumerable<ExileWebSocketSetting>>(File.ReadAllText("ws.json"));
-                foreach (var setting in des)
+                if (tempSettings != null)
                 {
-                    if (!Add(setting)) break;
+                    AddRange(tempSettings);
+                }
+                else if (File.Exists(_saveFile))
+                {
+                    try
+                    {
+                        var des = JsonConvert.DeserializeObject<List<ExileTradeWebSocketSetting>>(File.ReadAllText(_saveFile));
+                        AddRange(des);
+                    }
+                    catch (JsonSerializationException)
+                    {
+                        // Ignore
+                    }
                 }
             }
-            catch
+            else
             {
-                // Ignore
+                IsEnabled = false;
             }
+        }
+
+        public void Handle(LeaguesLoadedEvent message)
+        {
+            Leagues = message.Leagues;
         }
 
         public override Task<bool> CanCloseAsync()
         {
-            if (WebSockets.Any()) File.WriteAllText("ws.json", JsonConvert.SerializeObject(WebSockets.Select(s => s.Setting)));
+            if (_exileWebSocketManager != null) 
+                File.WriteAllText(_saveFile, JsonConvert.SerializeObject(_exileWebSocketManager.Settings()));
 
             return base.CanCloseAsync();
+        }
+
+        protected override void OnInitialActivate()
+        {
+            IDLoaderLoop();
+
+            base.OnInitialActivate();
+        }
+
+        private void AddRange(IEnumerable<ExileTradeWebSocketSetting> settings)
+        {
+            foreach (var ws in settings)
+            {
+                if (_exileWebSocketManager.Add(ws))
+                {
+                    WebSockets.Add(new AppWebSocket(ws.Name));
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private void OnLogMessage(object sender, string message)
+        {
+            SnackbarMessage(message, false, true);
+        }
+
+        private void OnNewIdRecieved(object sender, string id)
+        {
+            _messageQueue.Enqueue(id);
+        }
+
+        private void OnWebSocketConnected(object sender, string webSocketName)
+        {
+            var webSocket = WebSockets.FirstOrDefault(f => f.Name == webSocketName);
+
+            if (webSocket != null) webSocket.IsOpen = true;
+        }
+
+        private void OnWebSocketDisconnected(object sender, string webSocketName)
+        {
+            var webSocket = WebSockets.FirstOrDefault(f => f.Name == webSocketName);
+
+            if (webSocket != null) webSocket.IsOpen = false;
         }
     }
 }

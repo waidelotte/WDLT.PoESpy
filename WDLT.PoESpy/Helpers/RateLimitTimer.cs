@@ -1,43 +1,38 @@
 ﻿using System;
 using System.Windows.Threading;
 using Stylet;
-using WDLT.Clients.POE.Models;
 
 namespace WDLT.PoESpy.Helpers
 {
     public class RateLimitTimer : PropertyChangedBase
     {
         public string Endpoint { get; }
-        public POERateLimit RateLimit { get; }
-        public int RemainingPercent { get; private set; }
-        public int Remaining { get; private set; }
+        public double RemainingPercent { get; private set; }
+        public int Remaining { get;  set; }
 
         private readonly DispatcherTimer _timer;
-        public TimeSpan Limit { get; set; }
 
-        public RateLimitTimer(POERateLimit limit, string endpoint, Action<RateLimitTimer> onStop)
+        public RateLimitTimer(DateTimeOffset banUntil, string endpoint, Action<RateLimitTimer> onStop)
         {
             Endpoint = endpoint;
-            RateLimit = limit;
 
-            Limit = TimeSpan.FromSeconds(limit.Ban);
+            var total = (int) (banUntil - DateTimeOffset.Now).TotalSeconds;
+            Remaining = total;
 
             _timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
             {
-                if (Limit <= TimeSpan.Zero)
+                if (Remaining <= 0)
                 {
                     _timer.Stop();
                     onStop?.Invoke(this);
                 }
 
-                Limit = Limit.Add(TimeSpan.FromSeconds(-1));
+                Remaining--;
 
-                RemainingPercent = (int)(Limit.TotalSeconds / limit.Ban * 100);
-                Remaining = (int)Limit.TotalSeconds;
+                RemainingPercent = (double)Remaining / total * 100;
             }, Dispatcher.CurrentDispatcher);
 
             _timer.Start();
         }
-
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,11 +14,14 @@ using WDLT.PoESpy.Helpers;
 
 namespace WDLT.PoESpy.ViewModels
 {
-    public class InspectViewModel : BaseTabViewModel, IHandle<InspectEvent>
+    public class InspectViewModel : BaseTabViewModel, IHandle<InspectEvent>, IHandle<LeaguesLoadedEvent>
     {
-        public ExileEngine ExileEngine { get; }
         public POESearchResult TradeResult { get; private set; }
+
         public BindableCollection<POECharacter> Characters { get; }
+
+        public List<POELeague> Leagues { get; private set; }
+
         public string AccountName { get; set; }
 
         private string _selectedLeague;
@@ -33,13 +36,12 @@ namespace WDLT.PoESpy.ViewModels
         }
 
         private readonly AppWindowManager _windowManager;
-        private readonly ISnackbarMessageQueue _snackQueue;
+        private readonly ExileEngine _exileEngine;
 
-        public InspectViewModel(IEventAggregator eventAggregator, AppWindowManager windowManager, ISnackbarMessageQueue snackQueue, ExileEngine exileEngine) : base(ETab.Inspect, eventAggregator)
+        public InspectViewModel(IEventAggregator eventAggregator, AppWindowManager windowManager, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Inspect, eventAggregator, snackbarMessageQueue)
         {
             _windowManager = windowManager;
-            _snackQueue = snackQueue;
-            ExileEngine = exileEngine;
+            _exileEngine = exileEngine;
 
             Characters = new BindableCollection<POECharacter>();
         }
@@ -75,6 +77,11 @@ namespace WDLT.PoESpy.ViewModels
             await LoadingTask(InspectTask);
         }
 
+        public void Handle(LeaguesLoadedEvent message)
+        {
+            Leagues = message.Leagues;
+        }
+
         private async Task InspectTask()
         {
             Characters.Clear();
@@ -82,18 +89,18 @@ namespace WDLT.PoESpy.ViewModels
             var account = AccountName.Trim();
             var league = SelectedLeague;
 
-            if (await ExileEngine.AccountExistAsync(account))
+            if (await _exileEngine.AccountExistAsync(account))
             {
                 await LoadTrade(account, league);
 
-                var chars = await ExileEngine.Characters(account);
+                var chars = await _exileEngine.Characters(account);
                 if (chars == null) return;
 
                 Characters.AddRange(chars.OrderBy(o => o.League).ThenByDescending(b => b.Level));
             }
             else
             {
-                _snackQueue.Enqueue($"Account [{account}] does not exist");
+                SnackbarMessage($"Account [{account}] does not exist", true, false);
             }
         }
 
@@ -101,7 +108,7 @@ namespace WDLT.PoESpy.ViewModels
         {
             if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(league)) return;
 
-            TradeResult = await ExileEngine.SearchByAccountAsync(AccountName, SelectedLeague, EPOESort.Desc, EPOEOnlineStatus.Any);
+            TradeResult = await _exileEngine.SearchByAccountAsync(AccountName, SelectedLeague, EPOESort.Desc, EPOEOnlineStatus.Any);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,11 +15,15 @@ namespace WDLT.PoESpy.ViewModels
     public class TradeViewModel : Screen
     {
         public POESearchResult Search { get; private set; }
+
         public BindableCollection<POEFetchResult> Fetch { get; }
+
         public bool IsLoading { get; set; }
 
         private int _page;
+
         private readonly ExileEngine _exileEngine;
+
         private string _league;
 
         public TradeViewModel(ExileEngine exileEngine)
@@ -46,12 +49,12 @@ namespace WDLT.PoESpy.ViewModels
 
         public void Whisper(POEFetchResult fetch)
         {
-            fetch.ClipboardSetWhisper();
+            Clipboard.SetText(fetch.WhisperText());
         }
 
         public void Copy(POEFetchResult fetch)
         {
-            fetch.ClipboardSetItem();
+            Clipboard.SetText(fetch.RawItemText());
         }
 
         public async void ScrollChanged(object sender, ScrollChangedEventArgs e)

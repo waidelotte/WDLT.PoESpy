@@ -8,8 +8,6 @@ namespace WDLT.PoESpy.ViewModels
 {
     public class ToolsViewModel : BaseTabViewModel
     {
-        private readonly ExileEngine _exileEngine;
-
         public string AccountSearchResult { get; private set; }
 
         private string _characterName;
@@ -24,13 +22,14 @@ namespace WDLT.PoESpy.ViewModels
             }
         }
 
-        public bool CanAccountSearch => !IsLoading && !string.IsNullOrWhiteSpace(CharacterName);
+        private readonly ExileEngine _exileEngine;
 
-        public ToolsViewModel(IEventAggregator eventAggregator, ExileEngine exileEngine) : base(ETab.Tools, eventAggregator)
+        public ToolsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Tools, eventAggregator, snackbarMessageQueue)
         {
             _exileEngine = exileEngine;
         }
 
+        public bool CanAccountSearch => !IsLoading && !string.IsNullOrWhiteSpace(CharacterName);
         public Task AccountSearch()
         {
             return LoadingTask(AccountSearchTask);
@@ -40,10 +39,7 @@ namespace WDLT.PoESpy.ViewModels
         {
             var result = await _exileEngine.AccountNameByCharacter(CharacterName.Trim());
 
-            if (result != null)
-            {
-                AccountSearchResult = result.AccountName;
-            }
+            if (result != null) AccountSearchResult = result.AccountName;
         }
     }
 }

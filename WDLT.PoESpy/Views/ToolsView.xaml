@@ -38,8 +38,6 @@
                 Text="{Binding AccountSearchResult, Mode=OneWay}"
                 TextAlignment="Right"
                 materialDesign:HintAssist.HelperText="Account Name" />
-
         </Grid>
-
     </Grid>
 </UserControl>

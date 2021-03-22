@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using Stylet;
-using WDLT.PoESpy.Engine;
 using WDLT.PoESpy.Enums;
 using WDLT.PoESpy.Events;
 using WDLT.PoESpy.Properties;
@@ -11,45 +8,25 @@ namespace WDLT.PoESpy.ViewModels
 {
     public class SettingsViewModel : BaseTabViewModel, IHandle<AppLoadedEvent>
     {
-        public ExileEngine ExileEngine { get; }
+        public string POESESSID { get; set; }
 
-        private string _poesessid;
-        public string POESESSID
+        public void SavePOESESSID()
         {
-            get => _poesessid;
-            set
-            {
-                ExileEngine.SetSession(value);
-                SetAndNotify(ref _poesessid, value);
-            }
+            Settings.Default.POESESSID = POESESSID;
+            EventAggregator.Publish(new POESESSIDChangedEvent(POESESSID));
         }
 
-        private readonly ISnackbarMessageQueue _snackbarMessageQueue;
-
-        public SettingsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Settings, eventAggregator)
-        {
-            _snackbarMessageQueue = snackbarMessageQueue;
-            ExileEngine = exileEngine;
-        }
+        public SettingsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue) : base(ETab.Settings, eventAggregator, snackbarMessageQueue) { }
 
         public void Handle(AppLoadedEvent message)
         {
+            POESESSID = Settings.Default.POESESSID;
+            EventAggregator.Publish(new POESESSIDChangedEvent(POESESSID));
+
             if (string.IsNullOrWhiteSpace(Settings.Default.POESESSID))
             {
-                _snackbarMessageQueue.Enqueue("We strongly recommend specifying POESESSID in the Settings");
+                SnackbarMessage("We strongly recommend specifying POESESSID in the Settings", false, false);
             }
-            else
-            {
-                POESESSID = Settings.Default.POESESSID;
-            }
-        }
-
-        protected override void OnDeactivate()
-        {
-            Settings.Default.POESESSID = POESESSID;
-
-            Settings.Default.Save();
-            base.OnDeactivate();
         }
     }
 }

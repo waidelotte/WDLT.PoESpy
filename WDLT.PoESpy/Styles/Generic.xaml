@@ -32,4 +32,12 @@
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="0" />
     </Style>
 
+    <Style x:Key="MaterialDesignFloatingHintTextBox" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+    </Style>
+
+    <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+    </Style>
+
 </ResourceDictionary>

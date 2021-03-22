@@ -6,7 +6,6 @@
              xmlns:viewModels="clr-namespace:WDLT.PoESpy.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:s="https://github.com/canton7/Stylet"
-             xmlns:models="clr-namespace:WDLT.PoESpy.Models"
              d:DataContext="{d:DesignInstance viewModels:InspectViewModel}"
              mc:Ignorable="d">
     <Grid>
@@ -31,16 +30,13 @@
             <TextBox
                 Padding="5"
                 Grid.Column="0"
-                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 Text="{Binding AccountName, UpdateSourceTrigger=PropertyChanged}"
                 materialDesign:HintAssist.Hint="Account"
                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
-            <ComboBox ItemsSource="{Binding ExileEngine.Leagues, Mode=OneWay}"
+            <ComboBox ItemsSource="{Binding Leagues, Mode=OneWay}"
                       Grid.Column="1"
                       VerticalContentAlignment="Bottom"
                       VerticalAlignment="Stretch"
-                      Height="Auto"
-                      BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                       materialDesign:HintAssist.Hint="League"
                       materialDesign:HintAssist.HintOpacity=".25"
                       SelectedValue="{Binding SelectedLeague}"
@@ -54,8 +50,7 @@
                 ToolTip="Search"
                 BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 Style="{StaticResource MaterialDesignFlatButton}"
-                Command="{s:Action Inspect}"
-                materialDesign:ButtonAssist.CornerRadius="0">
+                Command="{s:Action Inspect}">
                 <materialDesign:PackIcon Kind="AccountSearch" />
             </Button>
         </Grid>

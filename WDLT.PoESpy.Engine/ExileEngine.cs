@@ -1,56 +1,28 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MaterialDesignThemes.Wpf;
-using Stylet;
-using Swordfish.NET.Collections;
 using WDLT.Clients.POE;
 using WDLT.Clients.POE.Enums;
 using WDLT.Clients.POE.Exception;
 using WDLT.Clients.POE.Models;
-using WDLT.PoESpy.Helpers;
-using WDLT.PoESpy.Properties;
-using WDLT.PoESpy.Services;
+using WDLT.PoESpy.Engine.Events;
 
 namespace WDLT.PoESpy.Engine
 {
     public class ExileEngine
     {
-        public ConcurrentObservableCollection<RateLimitTimer> RateLimits { get; }
-        public BindableCollection<POELeague> Leagues { get; }
-        public List<POEStatic> Static { get; private set; }
+        public event EventHandler<string> OnMessageEvent;
+        public event EventHandler<ExileRateLimitArgs> OnRateLimitEvent;
 
+        private readonly ConcurrentDictionary<string, DateTimeOffset> _rateLimits;
         private readonly POEClient _client;
-        private readonly ISnackbarMessageQueue _snackbarMessageQueue;
 
-        public ExileEngine(ISnackbarMessageQueue snackbarMessageQueue)
+        public ExileEngine(string userAgent)
         {
-            _snackbarMessageQueue = snackbarMessageQueue;
-            _client = new POEClient(Settings.Default.UserAgent);
-            RateLimits = new ConcurrentObservableCollection<RateLimitTimer>();
-            Leagues = new BindableCollection<POELeague>();
-        }
-
-        public async Task<bool> InitAsync()
-        {
-            var leagues = await CanBeExceptionAsync(() => _client.TradeLeaguesAsync(), "api-trade-leagues");
-            if(leagues == null) return false;
-            Leagues.AddRange(leagues.Result);
-
-            var st = await CanBeExceptionAsync(() => _client.TradeStaticAsync(), "api-trade-static");
-            if (st == null) return false;
-
-            Static = st.Result;
-
-            ImageCacheService.CreateDirectories();
-            foreach (var currency in Static.SelectMany(s => s.Entries).Where(w => !string.IsNullOrWhiteSpace(w.Image)))
-            {
-                if(ImageCacheService.Exist(currency.Id)) continue;
-                await _client.DownloadAsync(new Uri(POEClient.CDN + currency.Image), ImageCacheService.Get(currency.Id));
-            }
-
-            return true;
+            _client = new POEClient(userAgent);
+            _rateLimits = new ConcurrentDictionary<string, DateTimeOffset>();
         }
 
         public void SetSession(string id)
@@ -63,6 +35,16 @@ namespace WDLT.PoESpy.Engine
             return _client.POESESSID;
         }
 
+        public Task<POEResult<List<POEStatic>>> TradeStaticAsync()
+        {
+            return CanBeExceptionAsync(() => _client.TradeStaticAsync(), "api-trade-static");
+        }
+
+        public Task<POEResult<List<POELeague>>> TradeLeaguesAsync()
+        {
+            return CanBeExceptionAsync(() => _client.TradeLeaguesAsync(), "api-trade-leagues");
+        }
+
         public Task<POESearchResult> SearchAsync(string league, POESearchPayload payload)
         {
             return CanBeExceptionAsync(() => _client.TradeSearchAsync(league, payload), "api-trade-search");
@@ -71,6 +53,11 @@ namespace WDLT.PoESpy.Engine
         public Task<List<POECharacter>> Characters(string account)
         {
             return CanBeExceptionAsync(() => _client.Characters(account), "api-characters");
+        }
+
+        public Task DownloadImageAsync(string path, string savePath)
+        {
+            return _client.DownloadAsync(new Uri(POEClient.CDN + path), savePath);
         }
 
         public Task<POEAccountName> AccountNameByCharacter(string character)
@@ -128,27 +115,25 @@ namespace WDLT.PoESpy.Engine
         {
             foreach (var rt in limits)
             {
-                var exist = RateLimits.FirstOrDefault(f =>
-                    f.Endpoint == endpoint && f.RateLimit.Type == rt.Type &&
-                    f.RateLimit.Window == rt.Window);
+                _rateLimits.AddOrUpdate(endpoint, rt.BanUntil, (s, o) => rt.BanUntil);
 
-                if (exist == null)
-                {
-                    RateLimits.Add(new RateLimitTimer(rt, endpoint, t => RateLimits.Remove(t)));
-                }
-                else
-                {
-                    exist.Limit = TimeSpan.FromSeconds(rt.Ban);
-                }
+                OnRateLimitEvent?.Invoke(this, new ExileRateLimitArgs(rt, endpoint));
             }
         }
 
         private async Task<T> CanBeExceptionAsync<T>(Func<Task<T>> task, string endpoint)
         {
-            if (RateLimits.Any(a => a.Endpoint == endpoint))
+            if (_rateLimits.TryGetValue(endpoint, out var limit))
             {
-                _snackbarMessageQueue.Enqueue("[Rate-Limit-Guard] Try again later", null, null, null, false, true, TimeSpan.FromSeconds(3));
-                return default;
+                if (limit >= DateTimeOffset.Now)
+                {
+                    Log("[Rate-Limit-Guard] Try again later");
+                    return default;
+                }
+                else
+                {
+                    _rateLimits.TryRemove(endpoint, out _);
+                }
             }
 
             try
@@ -163,7 +148,7 @@ namespace WDLT.PoESpy.Engine
                 }
                 else
                 {
-                    _snackbarMessageQueue.Enqueue($"[Rate-Limit][{endpoint}] Exceeded", null, null, null, false, true, TimeSpan.FromSeconds(3));
+                    Log($"[Rate-Limit][{endpoint}] Exceeded");
                 }
 
                 return default;
@@ -185,14 +170,19 @@ namespace WDLT.PoESpy.Engine
                         break;
                 }
 
-                 _snackbarMessageQueue.Enqueue(text, null, null, null, true, false, TimeSpan.FromSeconds(3));
-                 return default;
+                Log(text);
+                return default;
             }
             catch (Exception e)
             {
-                _snackbarMessageQueue.Enqueue("Error: " + e.Message, null, null, null, true, false, TimeSpan.FromSeconds(10));
+                Log("Error: " + e.Message);
                 return default;
             }
+        }
+
+        private void Log(string message)
+        {
+            OnMessageEvent?.Invoke(this, message);
         }
     }
 }

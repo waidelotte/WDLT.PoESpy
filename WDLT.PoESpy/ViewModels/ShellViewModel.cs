@@ -11,22 +11,30 @@ using MaterialDesignThemes.Wpf;
 using Stylet;
 using WDLT.Clients.POE;
 using WDLT.PoESpy.Engine;
+using WDLT.PoESpy.Engine.Events;
 using WDLT.PoESpy.Enums;
 using WDLT.PoESpy.Events;
+using WDLT.PoESpy.Helpers;
+using WDLT.PoESpy.Services;
 
 namespace WDLT.PoESpy.ViewModels
 {
-    public class ShellViewModel : Conductor<IScreen>.Collection.OneActive, IHandle<ActivateTabEvent>
+    public class ShellViewModel : Conductor<IScreen>.Collection.OneActive, IHandle<ActivateTabEvent>, IHandle<POESESSIDChangedEvent>
     {
         public bool IsInitDone { get; private set; }
-        public ExileEngine ExileEngine { get; }
+
         public ISnackbarMessageQueue SnackbarMessageQueue { get; }
 
+        public BindableCollection<RateLimitTimer> RateLimits { get; }
+
         private readonly IEventAggregator _eventAggregator;
+
+        private readonly ExileEngine _exileEngine;
 
         public ShellViewModel(ISnackbarMessageQueue snackQueue, IEventAggregator eventAggregator, IEnumerable<BaseTabViewModel> tabs, ExileEngine exileEngine)
         {
             DisplayName = $"PoE Spy v.{GetType().Assembly.GetName().Version}";
+            RateLimits = new BindableCollection<RateLimitTimer>();
 
             Items.AddRange(tabs.OrderBy(o => o.Tab));
             ActiveItem = Items.First(f => ((BaseTabViewModel) f).Tab == ETab.Moneyway);
@@ -35,25 +43,9 @@ namespace WDLT.PoESpy.ViewModels
             _eventAggregator = eventAggregator;
             _eventAggregator.Subscribe(this);
 
-            ExileEngine = exileEngine;
-        }
-
-        protected override async void OnInitialActivate()
-        {
-            var result = await ExileEngine.InitAsync();
-
-            if (!result)
-            {
-                MessageBox.Show("Loading error. Please try again later.");
-                RequestClose();
-                return;
-            }
-
-            IsInitDone = true;
-
-            _eventAggregator.Publish(new AppLoadedEvent());
-
-            base.OnInitialActivate();
+            _exileEngine = exileEngine;
+            _exileEngine.OnMessageEvent += ExileEngineOnMessage;
+            _exileEngine.OnRateLimitEvent += ExileEngineOnNewRateLimit;
         }
 
         public void OpenTrade()
@@ -92,12 +84,64 @@ namespace WDLT.PoESpy.ViewModels
             ActivateItem(Items.First(f => ((BaseTabViewModel)f).Tab == message.Tab));
         }
 
+        public void Handle(POESESSIDChangedEvent message)
+        {
+            _exileEngine.SetSession(message.NewValue);
+        }
+
+        protected override async void OnInitialActivate()
+        {
+            var leagues = await _exileEngine.TradeLeaguesAsync();
+            var tradeStatic = await _exileEngine.TradeStaticAsync();
+
+            if (leagues == null || tradeStatic == null)
+            {
+                MessageBox.Show("Loading error. Please try again later.");
+                RequestClose();
+                return;
+            }
+
+            _eventAggregator.Publish(new LeaguesLoadedEvent(leagues.Result));
+
+            ImageCacheService.CreateDirectories();
+            foreach (var currency in tradeStatic.Result.SelectMany(s => s.Entries).Where(w => !string.IsNullOrWhiteSpace(w.Image)))
+            {
+                if (ImageCacheService.Exist(currency.Id)) continue;
+                await _exileEngine.DownloadImageAsync(currency.Image, ImageCacheService.Get(currency.Id));
+            }
+
+            IsInitDone = true;
+
+            _eventAggregator.Publish(new AppLoadedEvent());
+
+            base.OnInitialActivate();
+        }
+
         protected override void OnClose()
         {
             foreach (MetroWindow win in Application.Current.Windows)
             {
                 win.Close();
             }
+        }
+
+        private void ExileEngineOnNewRateLimit(object sender, ExileRateLimitArgs args)
+        {
+            var exist = RateLimits.FirstOrDefault(f => f.Endpoint == args.Endpoint);
+
+            if (exist == null)
+            {
+                RateLimits.Add(new RateLimitTimer(args.RateLimit.BanUntil, args.Endpoint, rl => RateLimits.Remove(rl)));
+            }
+            else
+            {
+                exist.Remaining = (int)(args.RateLimit.BanUntil - DateTimeOffset.Now).TotalSeconds;
+            }
+        }
+
+        private void ExileEngineOnMessage(object sender, string message)
+        {
+            SnackbarMessageQueue.Enqueue(message, null, null, null, false, false);
         }
     }
 }
