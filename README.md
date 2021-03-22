@@ -21,7 +21,6 @@ PoE Spy is Path of Exile Helper Tool
   
 ### TODO
  - [ ] Spy Crafts
- - [ ] Cleanup
  - [ ] Lots of other stuff in my head
  - [ ] My English
 
