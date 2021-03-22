@@ -23,6 +23,8 @@ namespace WDLT.PoESpy.ViewModels
     {
         public bool IsInitDone { get; private set; }
 
+        public string InitText { get; private set; }
+
         public ISnackbarMessageQueue SnackbarMessageQueue { get; }
 
         public BindableCollection<RateLimitTimer> RateLimits { get; }
@@ -107,6 +109,7 @@ namespace WDLT.PoESpy.ViewModels
             foreach (var currency in tradeStatic.Result.SelectMany(s => s.Entries).Where(w => !string.IsNullOrWhiteSpace(w.Image)))
             {
                 if (ImageCacheService.Exist(currency.Id)) continue;
+                InitText = $"[Image] {currency.Text}";
                 await _exileEngine.DownloadImageAsync(currency.Image, ImageCacheService.Get(currency.Id));
             }
 

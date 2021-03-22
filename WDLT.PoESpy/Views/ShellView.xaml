@@ -40,14 +40,15 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ProgressBar
-                Grid.Row="0"
-                Visibility="{Binding IsInitDone, Converter={StaticResource InverseBoolToVisConverter}}"
-                Style="{StaticResource MaterialDesignCircularProgressBar}"
-                Height="100"
-                Width="100"
-                Value="0"
-                IsIndeterminate="True" />
+            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsInitDone, Converter={StaticResource InverseBoolToVisConverter}}">
+                <ProgressBar
+                    Style="{StaticResource MaterialDesignCircularProgressBar}"
+                    Height="100"
+                    Width="100"
+                    Value="0"
+                    IsIndeterminate="True" />
+                <TextBlock Width="250" TextTrimming="CharacterEllipsis"  Text="{Binding InitText, StringFormat={}Loading: {0}}" Margin="0 10 0 0" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13" FontWeight="SemiBold"/>
+            </StackPanel>
             <Grid IsEnabled="{Binding IsInitDone}" Grid.Row="0">
                 <Grid.Style>
                     <Style TargetType="Grid">
