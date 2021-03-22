@@ -20,6 +20,7 @@ PoE Spy is Path of Exile Helper Tool
 - Request limit Guard
   
 ### TODO
+ - [ ] Notification sounds
  - [ ] Spy Crafts
  - [ ] Lots of other stuff in my head
  - [ ] My English
