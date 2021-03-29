@@ -94,6 +94,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn
+                    d:DataContext="{d:DesignInstance models:MoneywayItem}"
                     Binding="{Binding Account.Name}"
                     Header="Account"
                     Width="Auto"
@@ -111,20 +112,23 @@
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn
+                    d:DataContext="{d:DesignInstance models:MoneywayItem}"
                     Binding="{Binding Account.LastCharacterName}"
                     Header="Character"
                     Width="Auto"
                     ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
                 <DataGridTextColumn
+                    d:DataContext="{d:DesignInstance models:MoneywayItem}"
                     Binding="{Binding MirrorCount}"
                     Header="Mirrors"
                     Width="Auto"
-                    ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
+                    ElementStyle="{StaticResource CenterCell}"/>
                 <DataGridTextColumn
+                    d:DataContext="{d:DesignInstance models:MoneywayItem}"
                     Binding="{Binding ExaltCount}"
                     Header="Exalts"
                     Width="Auto"
-                    ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
+                    ElementStyle="{StaticResource CenterCell}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

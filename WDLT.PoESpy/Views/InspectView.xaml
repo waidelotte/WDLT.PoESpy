@@ -6,6 +6,7 @@
              xmlns:viewModels="clr-namespace:WDLT.PoESpy.ViewModels"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:s="https://github.com/canton7/Stylet"
+             xmlns:models="clr-namespace:WDLT.Clients.POE.Models;assembly=WDLT.Clients.POE"
              d:DataContext="{d:DesignInstance viewModels:InspectViewModel}"
              mc:Ignorable="d">
     <Grid>
@@ -66,27 +67,25 @@
                 CanUserReorderColumns="False"
                 materialDesign:DataGridAssist.CellPadding="4 2 2 2"
                 materialDesign:DataGridAssist.ColumnHeaderPadding="4 2 2 2">
-                <DataGrid.Resources>
-                    <Style x:Key="CenterCell" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
-                        <Setter Property="HorizontalAlignment" Value="Center" />
-                        <Setter Property="TextAlignment" Value="Center" />
-                    </Style>
-                </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTextColumn
+                        d:DataContext="{d:DesignInstance models:POECharacter}"
                         Binding="{Binding League}"
                         Header="League"
                         Width="Auto">
                     </DataGridTextColumn>
                     <DataGridTextColumn
+                        d:DataContext="{d:DesignInstance models:POECharacter}"
                         Binding="{Binding Name}"
                         Header="Name"
                         Width="Auto"/>
                     <DataGridTextColumn
+                        d:DataContext="{d:DesignInstance models:POECharacter}"
                         Binding="{Binding Class}"
                         Header="Class"
                         Width="Auto"/>
                     <DataGridTextColumn
+                        d:DataContext="{d:DesignInstance models:POECharacter}"
                         Binding="{Binding Level}"
                         Header="Level"
                         ElementStyle="{StaticResource CenterCell}"
