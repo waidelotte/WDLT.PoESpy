@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
-using WDLT.Clients.POE.Enums;
 using WDLT.PoESpy.Services;
 
 namespace WDLT.PoESpy.Helpers.Convertors
@@ -11,16 +10,9 @@ namespace WDLT.PoESpy.Helpers.Convertors
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string currency && parameter is EPOEStaicType type)
+            if (value is string currency)
             {
-                if (ImageCacheService.Exist(currency))
-                {
-                    return new Uri(ImageCacheService.Get(currency));
-                }
-                else
-                {
-                    return Binding.DoNothing;
-                }
+                return ImageCacheService.Exist(currency) ? new Uri(ImageCacheService.Get(currency)) : Binding.DoNothing;
             }
             else
             {
