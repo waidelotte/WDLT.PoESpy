@@ -8,10 +8,7 @@ namespace WDLT.PoESpy.Helpers.Convertors
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (targetType != typeof(bool))
-                throw new InvalidOperationException("The target must be a boolean");
-
-            return !(bool)value;
+            return value is bool b ? !b : throw new InvalidOperationException("Value must be a boolean");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
