@@ -24,7 +24,8 @@ namespace WDLT.PoESpy.ViewModels
 
         private readonly ExileEngine _exileEngine;
 
-        public ToolsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Tools, eventAggregator, snackbarMessageQueue)
+        public ToolsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue,
+            ExileEngine exileEngine) : base(ETab.Tools, eventAggregator, snackbarMessageQueue)
         {
             _exileEngine = exileEngine;
         }

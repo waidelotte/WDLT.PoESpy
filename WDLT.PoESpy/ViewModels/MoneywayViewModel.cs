@@ -27,7 +27,8 @@ namespace WDLT.PoESpy.ViewModels
 
         private readonly ExileEngine _exileEngine;
 
-        public MoneywayViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Moneyway, eventAggregator, snackbarMessageQueue)
+        public MoneywayViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue,
+            ExileEngine exileEngine) : base(ETab.Moneyway, eventAggregator, snackbarMessageQueue)
         {
             _exileEngine = exileEngine;
             Items = new BindableCollection<MoneywayItem>();

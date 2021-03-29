@@ -38,7 +38,9 @@ namespace WDLT.PoESpy.ViewModels
         private readonly AppWindowManager _windowManager;
         private readonly ExileEngine _exileEngine;
 
-        public InspectViewModel(IEventAggregator eventAggregator, AppWindowManager windowManager, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Inspect, eventAggregator, snackbarMessageQueue)
+        public InspectViewModel(IEventAggregator eventAggregator, AppWindowManager windowManager,
+            ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Inspect, eventAggregator,
+            snackbarMessageQueue)
         {
             _windowManager = windowManager;
             _exileEngine = exileEngine;
@@ -108,7 +110,9 @@ namespace WDLT.PoESpy.ViewModels
         {
             if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(league)) return;
 
-            TradeResult = await _exileEngine.SearchByAccountAsync(AccountName, SelectedLeague, EPOESort.Desc, EPOEOnlineStatus.Any);
+            TradeResult =
+                await _exileEngine.SearchByAccountAsync(AccountName, SelectedLeague, EPOESort.Desc,
+                    EPOEOnlineStatus.Any);
         }
     }
 }

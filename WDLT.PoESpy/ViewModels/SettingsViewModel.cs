@@ -16,7 +16,8 @@ namespace WDLT.PoESpy.ViewModels
             EventAggregator.Publish(new POESESSIDChangedEvent(POESESSID));
         }
 
-        public SettingsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue) : base(ETab.Settings, eventAggregator, snackbarMessageQueue) { }
+        public SettingsViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue) : base(
+            ETab.Settings, eventAggregator, snackbarMessageQueue) {}
 
         public void Handle(AppLoadedEvent message)
         {

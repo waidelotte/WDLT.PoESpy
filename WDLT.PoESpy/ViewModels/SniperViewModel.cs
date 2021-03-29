@@ -36,11 +36,12 @@ namespace WDLT.PoESpy.ViewModels
 
         private readonly Queue<string> _messageQueue;
 
-        private readonly string _saveFile = "ws.json";
+        private const string SAVE_FILE = "ws.json";
 
         private ExileTradeWebSocketManager _exileWebSocketManager;
 
-        public SniperViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue, ExileEngine exileEngine) : base(ETab.Sniper, eventAggregator, snackbarMessageQueue)
+        public SniperViewModel(IEventAggregator eventAggregator, ISnackbarMessageQueue snackbarMessageQueue,
+            ExileEngine exileEngine) : base(ETab.Sniper, eventAggregator, snackbarMessageQueue)
         {
             _messageQueue = new Queue<string>();
             _exileEngine = exileEngine;
@@ -87,13 +88,11 @@ namespace WDLT.PoESpy.ViewModels
         public bool CanAdd => !string.IsNullOrWhiteSpace(SelectedLeague) && !string.IsNullOrWhiteSpace(Query) && !string.IsNullOrWhiteSpace(Name);
         public void Add()
         {
-            if (_exileWebSocketManager != null && _exileWebSocketManager.Add(new ExileTradeWebSocketSetting(SelectedLeague, Query, Name)))
-            {
-                WebSockets.Add(new AppWebSocket(Name));
+            if (_exileWebSocketManager == null || !_exileWebSocketManager.Add(new ExileTradeWebSocketSetting(SelectedLeague, Query, Name))) return;
+            WebSockets.Add(new AppWebSocket(Name));
 
-                Query = null;
-                Name = null;
-            }
+            Query = null;
+            Name = null;
         }
 
         public async void IDLoaderLoop()
@@ -121,6 +120,7 @@ namespace WDLT.PoESpy.ViewModels
 
                 await Task.Delay(1000);
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         public void Handle(POESESSIDChangedEvent message)
@@ -154,11 +154,11 @@ namespace WDLT.PoESpy.ViewModels
                 {
                     AddRange(tempSettings);
                 }
-                else if (File.Exists(_saveFile))
+                else if (File.Exists(SAVE_FILE))
                 {
                     try
                     {
-                        var des = JsonConvert.DeserializeObject<List<ExileTradeWebSocketSetting>>(File.ReadAllText(_saveFile));
+                        var des = JsonConvert.DeserializeObject<List<ExileTradeWebSocketSetting>>(File.ReadAllText(SAVE_FILE));
                         AddRange(des);
                     }
                     catch (JsonSerializationException)
@@ -181,7 +181,7 @@ namespace WDLT.PoESpy.ViewModels
         public override Task<bool> CanCloseAsync()
         {
             if (_exileWebSocketManager != null) 
-                File.WriteAllText(_saveFile, JsonConvert.SerializeObject(_exileWebSocketManager.Settings()));
+                File.WriteAllText(SAVE_FILE, JsonConvert.SerializeObject(_exileWebSocketManager.Settings()));
 
             return base.CanCloseAsync();
         }

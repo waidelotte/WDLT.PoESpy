@@ -39,7 +39,7 @@ namespace WDLT.PoESpy.ViewModels
         {
             _league = league;
             Search = search;
-            DisplayName = $"PoE Spy | {league} | Total: {search.Total} [ID:{search.Id}]";
+            DisplayName = $"PoE Spy | {league} | Total: {search.Total.ToString()} [ID:{search.Id}]";
         }
 
         public void OpenClassicTrade()

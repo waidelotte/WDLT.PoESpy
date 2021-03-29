@@ -33,7 +33,8 @@ namespace WDLT.PoESpy.ViewModels
 
         private readonly ExileEngine _exileEngine;
 
-        public ShellViewModel(ISnackbarMessageQueue snackQueue, IEventAggregator eventAggregator, IEnumerable<BaseTabViewModel> tabs, ExileEngine exileEngine)
+        public ShellViewModel(ISnackbarMessageQueue snackQueue, IEventAggregator eventAggregator,
+            IEnumerable<BaseTabViewModel> tabs, ExileEngine exileEngine)
         {
             DisplayName = $"PoE Spy v.{GetType().Assembly.GetName().Version}";
             RateLimits = new BindableCollection<RateLimitTimer>();
