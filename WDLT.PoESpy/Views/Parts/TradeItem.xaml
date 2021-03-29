@@ -29,7 +29,7 @@
                 </Grid.ColumnDefinitions>
                 <Image Grid.Column="0" Margin="5 0 3 0" RenderOptions.BitmapScalingMode="HighQuality"
                        Height="30" Width="30" VerticalAlignment="Center"
-                       Source="{Binding Listing.Price.Currency, Converter={StaticResource ImageCacheConverter}, ConverterParameter={x:Static enumPoe:EPOEStaicType.Currency}, Mode=OneWay}" />
+                       Source="{Binding Listing.Price.Currency, Converter={StaticResource ImageCacheConverter}, Mode=OneWay}" />
                 <TextBlock Grid.Column="1" Padding="0 0 5 0"
                            Foreground="{DynamicResource PrimaryHueMidBrush}"
                            HorizontalAlignment="Center" Text="{Binding Listing.Price.Amount}"
