@@ -28,6 +28,7 @@ namespace WDLT.PoESpy
         {
             Settings.Default.Save();
 
+
             base.OnExit(e);
         }
     }
